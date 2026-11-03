@@ -49,7 +49,33 @@ footer{text-align:center;padding:25px;color:#8fa1b9;font-size:12px}
 <p>Fast Playing XI, Toss Updates, Player Statistics and Professional Fantasy Research.</p>
 <a href="#matches" class="btn">EXPLORE MATCHES →</a>
 </section>
+<section class="container" id="account">
+  <div class="card">
+    <h2>👤 User Account</h2>
+    <p class="muted" id="auth-status">Login or create your account</p>
 
+    <input id="auth-email" type="email" placeholder="Email Address"
+      style="width:100%;padding:13px;margin-top:12px;border-radius:8px">
+
+    <input id="auth-password" type="password" placeholder="Password"
+      style="width:100%;padding:13px;margin-top:10px;border-radius:8px">
+
+    <button onclick="signUpUser()"
+      style="padding:12px;margin-top:12px;background:#e9ad39;border:0;border-radius:8px">
+      Sign Up
+    </button>
+
+    <button onclick="loginUser()"
+      style="padding:12px;margin-top:12px;background:#54d9a1;border:0;border-radius:8px">
+      Login
+    </button>
+
+    <button onclick="logoutUser()"
+      style="padding:12px;margin-top:12px;background:#263653;color:white;border:0;border-radius:8px">
+      Logout
+    </button>
+  </div>
+</section>
 <main class="container">
 <h2 class="heading" id="matches">🏏 Latest Matches</h2>
 
@@ -185,7 +211,50 @@ async function loadPremiumAnalysis() {
     box.appendChild(card);
   });
 }
-  
+async function signUpUser() {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+
+  if (!email || password.length < 6) {
+    alert("Email और कम से कम 6 अक्षर का Password डालें।");
+    return;
+  }
+
+  const { error } = await db.auth.signUp({ email, password });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    alert("Account created! Email verification करके Login करें।");
+  }
+}
+
+async function loginUser() {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+
+  const { error } = await db.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    document.getElementById("auth-status").textContent = "Logged in: " + email;
+    alert("Login successful!");
+    loadPremiumAnalysis();
+  }
+}
+
+async function logoutUser() {
+  const { error } = await db.auth.signOut();
+
+  if (error) {
+    alert(error.message);
+  } else {
+    document.getElementById("auth-status").textContent = "Login or create your account";
+    alert("Logout successful!");
+    loadPremiumAnalysis();
+  }
+}  
 loadMatches();
 loadPremiumAnalysis();
 </script>
