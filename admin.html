@@ -6,22 +6,87 @@
 <title>Cricket Analyst Pro - Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body{margin:0;background:#080f1d;color:white;font-family:Arial;padding:25px}
-.box{max-width:400px;margin:90px auto;background:#142238;padding:25px;border-radius:15px;border:1px solid #263b59}
-h2{color:#f4bd4d;text-align:center}
-input{width:100%;box-sizing:border-box;padding:14px;margin:10px 0;background:#080f1d;color:white;border:1px solid #52627a;border-radius:8px}
-button{width:100%;padding:14px;background:#f4bd4d;border:0;border-radius:8px;font-weight:bold;margin-top:15px}
-#msg{text-align:center;color:#ff7777}
+*{box-sizing:border-box}
+body{margin:0;background:#080f1d;color:white;font-family:Arial;padding:18px}
+.box{max-width:850px;margin:25px auto}
+h1{color:#f4bd4d}
+.card{background:#142238;padding:18px;border-radius:12px;margin:15px 0;border:1px solid #263b59}
+input,select,textarea{width:100%;padding:13px;margin:8px 0;background:#080f1d;color:white;border:1px solid #52627a;border-radius:8px}
+button{padding:12px 18px;background:#f4bd4d;color:#101827;border:0;border-radius:7px;font-weight:bold;margin:5px;cursor:pointer}
+.delete{background:#e05252;color:white}
+.logout{background:#52627a;color:white}
+small{color:#a9bad0}
+.hidden{display:none}
+.item{border-bottom:1px solid #35445a;padding:12px 0}
 </style>
 </head>
 <body>
 <div class="box">
-<h2>🏏 CRICKET ANALYST PRO</h2>
-<h3>Admin Login</h3>
+
+<div id="login" class="card">
+<h1>🏏 CRICKET ANALYST PRO</h1>
+<h2>Admin Login</h2>
 <input id="email" type="email" placeholder="Admin Email">
 <input id="password" type="password" placeholder="Password">
 <button onclick="login()">LOGIN</button>
 <p id="msg"></p>
+</div>
+
+<div id="dashboard" class="hidden">
+<h1>🏏 ADMIN DASHBOARD</h1>
+<p>Welcome to Cricket Analyst Pro</p>
+<button class="logout" onclick="logout()">LOGOUT</button>
+
+<div class="card">
+<h2>➕ Add New Match</h2>
+<input id="teamA" placeholder="Team A">
+<input id="teamB" placeholder="Team B">
+<input id="tournament" placeholder="Tournament Name">
+<label>Match Date & Time</label>
+<input id="date" type="datetime-local">
+<select id="status">
+<option value="Upcoming">Upcoming</option>
+<option value="Live">Live</option>
+<option value="Completed">Completed</option>
+</select>
+<input id="toss" placeholder="Toss Update">
+<button onclick="addMatch()">ADD MATCH</button>
+</div>
+
+<div class="card">
+<h2>📋 Manage Matches</h2>
+<button onclick="loadMatches()">REFRESH</button>
+<div id="matches">Loading...</div>
+</div>
+
+<div class="card">
+<h2>👥 Add Playing XI</h2>
+<select id="matchSelect">
+<option value="">Select Match</option>
+</select>
+<input id="xiTeam" placeholder="Team Name">
+<input id="player" placeholder="Player Name">
+<label><input type="checkbox" id="captain" style="width:auto"> Captain</label>
+<label><input type="checkbox" id="keeper" style="width:auto"> Wicketkeeper</label>
+<br>
+<button onclick="addPlayer()">ADD PLAYER</button>
+<div id="players"></div>
+</div>
+
+<div class="card">
+<h2>👑 Premium Analysis</h2>
+<select id="premiumMatch">
+<option value="">Select Match</option>
+</select>
+<input id="analysisTitle" placeholder="Analysis Title">
+<textarea id="analysisText" rows="5" placeholder="Write Match Analysis"></textarea>
+<label><input type="checkbox" id="premium" style="width:auto" checked> Premium Content</label>
+<br>
+<button onclick="addAnalysis()">PUBLISH ANALYSIS</button>
+</div>
+
+<p id="result"></p>
+</div>
 </div>
 
 <script>
@@ -29,17 +94,22 @@ const SUPABASE_URL = "https://knjjglmoborkqmagjzpe.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b_L9qWRfBew0ux7CjkDVlg_JomkHCvK";
 
 const db = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
+SUPABASE_URL, SUPABASE_KEY
 );
+
+const ADMIN = "cricdjpro@gmail.com";
+
+function message(t){
+document.getElementById("result").textContent=t;
+}
 
 async function login(){
 const email=document.getElementById("email").value.trim();
 const password=document.getElementById("password").value;
 const msg=document.getElementById("msg");
 
-if(email.toLowerCase()!=="cricdjpro@gmail.com"){
-msg.innerText="Unauthorized Admin!";
+if(email.toLowerCase()!==ADMIN){
+msg.textContent="Unauthorized Admin";
 return;
 }
 
@@ -48,13 +118,237 @@ email,password
 });
 
 if(error){
-msg.innerText=error.message;
+msg.textContent=error.message;
 return;
 }
 
-msg.style.color="#50dda0";
-msg.innerText="Login Successful!";
+if(data.user.email.toLowerCase()!==ADMIN){
+await db.auth.signOut();
+msg.textContent="Unauthorized";
+return;
 }
+
+showDashboard();
+}
+
+async function showDashboard(){
+document.getElementById("login").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
+await loadMatches();
+}
+
+async function logout(){
+await db.auth.signOut();
+location.reload();
+}
+
+async function addMatch(){
+const a=document.getElementById("teamA").value.trim();
+const b=document.getElementById("teamB").value.trim();
+const date=document.getElementById("date").value;
+
+if(!a||!b||!date){
+message("Please enter teams and date.");
+return;
+}
+
+const {error}=await db.from("matches").insert([{
+team_a:a,
+team_b:b,
+tournament:document.getElementById("tournament").value,
+match_date:new Date(date).toISOString(),
+status:document.getElementById("status").value,
+toss:document.getElementById("toss").value
+}]);
+
+if(error){message(error.message);return;}
+
+message("Match added successfully!");
+["teamA","teamB","tournament","date","toss"].forEach(id=>{
+document.getElementById(id).value="";
+});
+await loadMatches();
+}
+
+async function loadMatches(){
+const {data,error}=await db.from("matches")
+.select("*").order("match_date",{ascending:true});
+
+if(error){message(error.message);return;}
+
+const list=document.getElementById("matches");
+const selects=["matchSelect","premiumMatch"];
+
+selects.forEach(id=>{
+const s=document.getElementById(id);
+s.innerHTML='<option value="">Select Match</option>';
+});
+
+list.innerHTML="";
+
+(data||[]).forEach(m=>{
+const label=m.team_a+" vs "+m.team_b;
+
+selects.forEach(id=>{
+const op=document.createElement("option");
+op.value=m.id;
+op.textContent=label+" (#"+m.id+")";
+document.getElementById(id).appendChild(op);
+});
+
+const div=document.createElement("div");
+div.className="item";
+
+const h=document.createElement("h3");
+h.textContent=label;
+div.appendChild(h);
+
+const info=document.createElement("small");
+info.textContent=(m.tournament||"")+
+" | "+(m.status||"Upcoming")+
+" | "+(m.match_date||"");
+div.appendChild(info);
+
+const status=document.createElement("select");
+["Upcoming","Live","Completed"].forEach(v=>{
+const op=document.createElement("option");
+op.value=v;op.textContent=v;
+status.appendChild(op);
+});
+status.value=m.status||"Upcoming";
+div.appendChild(status);
+
+const toss=document.createElement("input");
+toss.placeholder="Update toss";
+toss.value=m.toss||"";
+div.appendChild(toss);
+
+const update=document.createElement("button");
+update.textContent="UPDATE";
+update.onclick=()=>updateMatch(m.id,status.value,toss.value);
+div.appendChild(update);
+
+const del=document.createElement("button");
+del.textContent="DELETE";
+del.className="delete";
+del.onclick=()=>deleteMatch(m.id);
+div.appendChild(del);
+
+list.appendChild(div);
+});
+
+if(!data||data.length===0)list.textContent="No matches added yet.";
+}
+
+async function updateMatch(id,status,toss){
+const {error}=await db.from("matches")
+.update({status,toss}).eq("id",id);
+if(error){message(error.message);return;}
+message("Match updated!");
+await loadMatches();
+}
+
+async function deleteMatch(id){
+if(!confirm("Delete this match and its related data?"))return;
+
+const {error}=await db.from("matches").delete().eq("id",id);
+if(error){message(error.message);return;}
+message("Match deleted!");
+await loadMatches();
+}
+
+async function addPlayer(){
+const match_id=document.getElementById("matchSelect").value;
+const team_name=document.getElementById("xiTeam").value.trim();
+const player_name=document.getElementById("player").value.trim();
+
+if(!match_id||!team_name||!player_name){
+message("Select match, team and player.");
+return;
+}
+
+const {error}=await db.from("playing_xi").insert([{
+match_id:Number(match_id),
+team_name,
+player_name,
+is_captain:document.getElementById("captain").checked,
+is_wicketkeeper:document.getElementById("keeper").checked
+}]);
+
+if(error){message(error.message);return;}
+
+message("Player added successfully!");
+document.getElementById("player").value="";
+await loadPlayers();
+}
+
+async function loadPlayers(){
+const id=document.getElementById("matchSelect").value;
+const box=document.getElementById("players");
+box.innerHTML="";
+if(!id)return;
+
+const {data,error}=await db.from("playing_xi")
+.select("*").eq("match_id",Number(id));
+
+if(error){message(error.message);return;}
+
+(data||[]).forEach(p=>{
+const div=document.createElement("div");
+div.className="item";
+div.textContent=p.team_name+" - "+p.player_name+
+(p.is_captain?" (C)":"")+
+(p.is_wicketkeeper?" (WK)":"");
+
+const del=document.createElement("button");
+del.className="delete";
+del.textContent="Remove";
+del.onclick=async()=>{
+const {error}=await db.from("playing_xi")
+.delete().eq("id",p.id);
+if(error){message(error.message);return;}
+loadPlayers();
+};
+div.appendChild(del);
+box.appendChild(div);
+});
+}
+
+document.getElementById("matchSelect").addEventListener("change",loadPlayers);
+
+async function addAnalysis(){
+const match_id=document.getElementById("premiumMatch").value;
+const title=document.getElementById("analysisTitle").value.trim();
+const analysis=document.getElementById("analysisText").value.trim();
+
+if(!match_id||!title||!analysis){
+message("Fill all analysis fields.");
+return;
+}
+
+const {error}=await db.from("premium_analysis").insert([{
+match_id:Number(match_id),
+title,
+analysis,
+is_premium:document.getElementById("premium").checked
+}]);
+
+if(error){message(error.message);return;}
+message("Analysis published!");
+document.getElementById("analysisTitle").value="";
+document.getElementById("analysisText").value="";
+}
+
+async function checkSession(){
+const {data}=await db.auth.getSession();
+const user=data.session?.user;
+
+if(user?.email?.toLowerCase()===ADMIN){
+showDashboard();
+}
+}
+
+checkSession();
 </script>
 </body>
 </html>
