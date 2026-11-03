@@ -404,20 +404,14 @@ async function updateUserPremium(userId, active) {
 
   if (active) {
     const date = prompt("Expiry date YYYY-MM-DD format mein daalo:");
-    if (!date || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) {
-      alert("Sahi date daalo.");
-      return;
-    }
-
     const parsed = new Date(date + "T23:59:59");
-    if (Number.isNaN(parsed.getTime()) ||
-        parsed.toISOString().slice(0, 10) !== date) {
-      alert("Invalid date.");
-      return;
-    }
 
-    expiry = parsed.toISOString();
-  }
+if (Number.isNaN(parsed.getTime())) {
+  alert("Sahi date daalo.");
+  return;
+}
+
+expiry = parsed.toISOString();
 
   const { error } = await db
     .from("profiles")
