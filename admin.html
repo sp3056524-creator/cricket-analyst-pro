@@ -401,10 +401,24 @@ async function loadUsers() {
 
 async function updateUserPremium(userId, active) {
   let expiry = null;
+if (active) {
+  const date = prompt("Expiry date YYYY-MM-DD format mein daalo:");
 
-  if (active) {
-    const date = prompt("Expiry date YYYY-MM-DD format mein daalo:");
-    const parsed = new Date(date + "T23:59:59");
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    alert("Date format galat hai.");
+    return;
+  }
+
+  const d = new Date(date + "T00:00:00Z");
+
+  if (isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== date) {
+    alert("Sahi date daalo.");
+    return;
+  }
+
+  expiry = date + "T23:59:59.999Z";
+}
+  
 
 if (Number.isNaN(parsed.getTime())) {
   alert("Sahi date daalo.");
