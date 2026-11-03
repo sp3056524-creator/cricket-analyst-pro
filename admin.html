@@ -358,9 +358,8 @@ async function loadUsers() {
 
   const { data, error } = await db
     .from("profiles")
-    .select("id, email, full_name, is_premium, premium_expiry")
-    .order("created_at", { ascending: false });
-
+    .select("id, email, full_name, is_premium, premium_expiry");
+    
   if (error) {
     box.textContent = error.message;
     return;
