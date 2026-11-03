@@ -36,7 +36,11 @@ small{color:#a9bad0}
 <h1>🏏 ADMIN DASHBOARD</h1>
 <p>Welcome to Cricket Analyst Pro</p>
 <button class="logout" onclick="logout()">LOGOUT</button>
-
+<div class="card">
+  <h2>👥 Manage Users</h2>
+  <button onclick="loadUsers()">Refresh Users</button>
+  <div id="usersList">Loading users...</div>
+</div>
 <div class="card">
 <h2>➕ Add New Match</h2>
 <input id="teamA" placeholder="Team A">
@@ -344,10 +348,94 @@ const {data}=await db.auth.getSession();
 const user=data.session?.user;
 
 if(user?.email?.toLowerCase()===ADMIN){
+
 showDashboard();
 }
 }
+async function loadUsers() {
+  const box = document.getElementById("usersList");
+  box.textContent = "Loading users...";
 
+  const { data, error } = await db
+    .from("profiles")
+    .select("id, email, full_name, is_premium, premium_expiry")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  box.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    box.textContent = "No users found.";
+    return;
+  }
+
+  data.forEach(user => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const info = document.createElement("p");
+    info.textContent =
+      (user.full_name || "User") + " | " + user.email +
+      " | " + (user.is_premium ? "PREMIUM" : "FREE");
+
+    const expiry = document.createElement("p");
+    expiry.textContent = user.premium_expiry
+      ? "Expiry: " + new Date(user.premium_expiry).toLocaleDateString()
+      : "No expiry set";
+
+    const activate = document.createElement("button");
+    activate.textContent = "Activate Premium";
+    activate.onclick = () => updateUserPremium(user.id, true);
+
+    const deactivate = document.createElement("button");
+    deactivate.textContent = "Remove Premium";
+    deactivate.onclick = () => updateUserPremium(user.id, false);
+
+    card.append(info, expiry, activate, deactivate);
+    box.appendChild(card);
+  });
+}
+
+async function updateUserPremium(userId, active) {
+  let expiry = null;
+
+  if (active) {
+    const date = prompt("Expiry date YYYY-MM-DD format mein daalo:");
+    if (!date || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) {
+      alert("Sahi date daalo.");
+      return;
+    }
+
+    const parsed = new Date(date + "T23:59:59");
+    if (Number.isNaN(parsed.getTime()) ||
+        parsed.toISOString().slice(0, 10) !== date) {
+      alert("Invalid date.");
+      return;
+    }
+
+    expiry = parsed.toISOString();
+  }
+
+  const { error } = await db
+    .from("profiles")
+    .update({
+      is_premium: active,
+      premium_expiry: expiry
+    })
+    .eq("id", userId);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Membership updated!");
+  loadUsers();
+}
 checkSession();
 </script>
 </body>
