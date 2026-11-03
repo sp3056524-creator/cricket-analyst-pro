@@ -87,5 +87,65 @@ footer{text-align:center;padding:25px;color:#8fa1b9;font-size:12px}
 © 2026 Cricket Analyst Pro<br>
 Independent Cricket Research Platform
 </footer>
+  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<section style="padding:20px;color:white;background:#080f1d">
+  <h2>🏏 Live Database Matches</h2>
+  <div id="db-matches">Loading matches...</div>
+</section>
+
+<script>
+const SUPABASE_URL = "https://knjjglmoborkqmagjzpe.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b_L9qWRfBew0ux7CjkDVlg_JomkHCvK";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+async function loadMatches() {
+  const box = document.getElementById("db-matches");
+
+  const { data, error } = await db
+    .from("matches")
+    .select("*")
+    .order("match_date", { ascending: true });
+
+  if (error) {
+    box.textContent = "Database connection error. Please check settings.";
+    return;
+  }
+
+  if (!data.length) {
+    box.textContent = "No matches added yet.";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  data.forEach(match => {
+    const card = document.createElement("div");
+    card.style.cssText =
+      "background:#142238;padding:16px;margin:12px 0;border-radius:12px";
+
+    const title = document.createElement("h3");
+    title.textContent = match.team_a + " VS " + match.team_b;
+
+    const info = document.createElement("p");
+    info.textContent =
+      (match.tournament || "") + " | " + (match.status || "Upcoming");
+
+    const toss = document.createElement("p");
+    toss.textContent = "Toss: " + (match.toss || "Not announced");
+
+    card.append(title, info, toss);
+    box.appendChild(card);
+  });
+}
+
+loadMatches();
+</script>
+  
 </body>
 </html>
