@@ -420,12 +420,6 @@ if (active) {
 }
   
 
-if (Number.isNaN(parsed.getTime())) {
-  alert("Sahi date daalo.");
-  return;
-}
-
-expiry = parsed.toISOString();
 
   const { error } = await db
     .from("profiles")
