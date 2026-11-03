@@ -81,6 +81,7 @@ footer{text-align:center;padding:25px;color:#8fa1b9;font-size:12px}
 <div class="lock">🔒 PREMIUM CONTENT</div>
 <p class="muted" style="margin-top:12px">Premium access coming soon.</p>
 </div>
+<div id="premium-list"></div>
 </main>
 
 <footer>
@@ -144,7 +145,49 @@ async function loadMatches() {
   });
 }
 
+async function loadPremiumAnalysis() {
+  const box = document.getElementById("premium-list");
+
+  const { data, error } = await db
+    .from("premium_analysis")
+    .select("title, analysis, is_premium")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    box.textContent = "Analysis loading error.";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    box.textContent = "No analysis available yet.";
+    return;
+  }
+
+  data.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("h3");
+    title.textContent = item.title;
+
+    const content = document.createElement("p");
+    content.className = "muted";
+
+    if (item.is_premium) {
+      content.textContent = "🔒 Premium Content";
+    } else {
+      content.textContent = item.analysis;
+    }
+
+    card.append(title, content);
+    box.appendChild(card);
+  });
+}
+  
 loadMatches();
+loadPremiumAnalysis();
 </script>
   
 </body>
