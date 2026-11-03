@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cricket Analyst Pro - Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{margin:0;background:#080f1d;color:white;font-family:Arial;padding:25px}
+.box{max-width:400px;margin:90px auto;background:#142238;padding:25px;border-radius:15px;border:1px solid #263b59}
+h2{color:#f4bd4d;text-align:center}
+input{width:100%;box-sizing:border-box;padding:14px;margin:10px 0;background:#080f1d;color:white;border:1px solid #52627a;border-radius:8px}
+button{width:100%;padding:14px;background:#f4bd4d;border:0;border-radius:8px;font-weight:bold;margin-top:15px}
+#msg{text-align:center;color:#ff7777}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>🏏 CRICKET ANALYST PRO</h2>
+<h3>Admin Login</h3>
+<input id="email" type="email" placeholder="Admin Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">LOGIN</button>
+<p id="msg"></p>
+</div>
+
+<script>
+const SUPABASE_URL = "https://knjjglmoborkqmagjzpe.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b_L9qWRfBew0ux7CjkDVlg_JomkHCvK";
+
+const db = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+async function login(){
+const email=document.getElementById("email").value.trim();
+const password=document.getElementById("password").value;
+const msg=document.getElementById("msg");
+
+if(email.toLowerCase()!=="cricdjpro@gmail.com"){
+msg.innerText="Unauthorized Admin!";
+return;
+}
+
+const {data,error}=await db.auth.signInWithPassword({
+email,password
+});
+
+if(error){
+msg.innerText=error.message;
+return;
+}
+
+msg.style.color="#50dda0";
+msg.innerText="Login Successful!";
+}
+</script>
+</body>
+</html>
