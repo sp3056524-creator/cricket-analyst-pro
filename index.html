@@ -180,9 +180,27 @@ async function loadMatches() {
     box.appendChild(card);
   });
 }
-
 async function loadPremiumAnalysis() {
   const box = document.getElementById("premium-list");
+
+  const { data: { user } } = await db.auth.getUser();
+
+  let hasPremiumAccess = false;
+
+  if (user) {
+    const { data: profile } = await db
+      .from("profiles")
+      .select("is_premium, premium_expiry")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    hasPremiumAccess = !!(
+      profile &&
+      profile.is_premium === true &&
+      (!profile.premium_expiry ||
+       new Date(profile.premium_expiry) > new Date())
+    );
+  }
 
   const { data, error } = await db
     .from("premium_analysis")
@@ -190,7 +208,7 @@ async function loadPremiumAnalysis() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    box.textContent = "Analysis loading error.";
+    box.textContent = "Analysis loading error: " + error.message;
     return;
   }
 
@@ -211,7 +229,7 @@ async function loadPremiumAnalysis() {
     const content = document.createElement("p");
     content.className = "muted";
 
-    if (item.is_premium) {
+    if (item.is_premium && !hasPremiumAccess) {
       content.textContent = "🔒 Premium Content";
     } else {
       content.textContent = item.analysis;
