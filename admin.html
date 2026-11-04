@@ -379,29 +379,61 @@ async function loadAnalysis() {
     const content = document.createElement("p");
     content.textContent = item.analysis;
 
-    const del = document.createElement("button");
-    del.textContent = "DELETE";
-    del.className = "delete";
+  const edit = document.createElement("button");
+edit.textContent = "EDIT";
 
-    del.onclick = async () => {
-      if (!confirm("Delete this analysis?")) return;
+edit.onclick = async () => {
+  const newTitle = prompt("Edit Analysis Title:", item.title);
+  if (newTitle === null) return;
 
-      const { error } = await db
-        .from("premium_analysis")
-        .delete()
-        .eq("id", item.id);
+  const newAnalysis = prompt("Edit Analysis Content:", item.analysis);
+  if (newAnalysis === null) return;
 
-      if (error) {
-        alert(error.message);
-        return;
-      }
+  if (!newTitle.trim() || !newAnalysis.trim()) {
+    alert("Fields cannot be empty.");
+    return;
+  }
 
-      alert("Analysis deleted!");
-      loadAnalysis();
-    };
+  const { error } = await db
+    .from("premium_analysis")
+    .update({
+      title: newTitle.trim(),
+      analysis: newAnalysis.trim()
+    })
+    .eq("id", item.id);
 
-    card.append(title, content, del);
-    box.appendChild(card);
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Analysis updated successfully!");
+  loadAnalysis();
+};
+
+const del = document.createElement("button");
+del.textContent = "DELETE";
+del.className = "delete";
+
+del.onclick = async () => {
+  if (!confirm("Delete this analysis?")) return;
+
+  const { error } = await db
+    .from("premium_analysis")
+    .delete()
+    .eq("id", item.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Analysis deleted!");
+  loadAnalysis();
+};
+
+card.append(title, content, edit, del);
+box.appendChild(card);
   });
 }
 async function checkSession(){
