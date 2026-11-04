@@ -540,6 +540,57 @@ if (active) {
 
   alert("Membership updated!");
   loadUsers();
+  async function uploadTeamImage() {
+  const title = document.getElementById("teamTitle").value.trim();
+  const file = document.getElementById("teamImage").files[0];
+  const access = document.getElementById("teamAccess").value;
+  const status = document.getElementById("uploadStatus");
+
+  if (!title || !file) {
+    alert("Team title aur JPG image select karo.");
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    alert("Sirf image upload kar sakte ho.");
+    return;
+  }
+
+  status.textContent = "Uploading...";
+
+  const fileName = Date.now() + "-" +
+    file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+  const path = access + "/" + fileName;
+
+  const { error: uploadError } = await db.storage
+    .from("premium-teams")
+    .upload(path, file);
+
+  if (uploadError) {
+    status.textContent = uploadError.message;
+    return;
+  }
+
+  const { error: saveError } = await db
+    .from("team_images")
+    .insert([{
+      title: title,
+      image_path: path,
+      access: access
+    }]);
+
+  if (saveError) {
+    await db.storage.from("premium-teams").remove([path]);
+    status.textContent = saveError.message;
+    return;
+  }
+
+  status.textContent = "Team uploaded successfully!";
+
+  document.getElementById("teamTitle").value = "";
+  document.getElementById("teamImage").value = "";
+  }
 }
 checkSession();
 </script>
