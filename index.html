@@ -114,8 +114,8 @@ Forgot Password?
 <div class="card">
 <h3>Premium Fantasy Research</h3>
 <p class="muted">Detailed analysis and expert team combinations after official lineups.</p>
-<div class="lock">🔒 PREMIUM CONTENT</div>
-<p class="muted" style="margin-top:12px">Premium access coming soon.</p>
+<div class="lock" id="premium-banner-lock">🔒 PREMIUM CONTENT</div>
+<p class="muted" id="premium-banner-note" style="margin-top:12px">Premium access coming soon.</p>
 </div>
 <div id="premium-list"></div>
 </main>
@@ -201,7 +201,18 @@ async function loadPremiumAnalysis() {
        new Date(profile.premium_expiry) > new Date())
     );
   }
+const bannerLock = document.getElementById("premium-banner-lock");
+const bannerNote = document.getElementById("premium-banner-note");
 
+if (bannerLock && bannerNote) {
+  if (hasPremiumAccess) {
+    bannerLock.textContent = "🔓 PREMIUM ACCESS ACTIVE";
+    bannerNote.textContent = "Your premium membership is active.";
+  } else {
+    bannerLock.textContent = "🔒 PREMIUM CONTENT";
+    bannerNote.textContent = "Premium access coming soon.";
+  }
+}
   const { data, error } = await db
     .from("premium_analysis")
     .select("title, analysis, is_premium")
