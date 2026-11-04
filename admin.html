@@ -540,7 +540,8 @@ if (active) {
 
   alert("Membership updated!");
   loadUsers();
-  async function uploadTeamImage() {
+}
+async function uploadTeamImage() {
   const title = document.getElementById("teamTitle").value.trim();
   const file = document.getElementById("teamImage").files[0];
   const access = document.getElementById("teamAccess").value;
@@ -591,7 +592,7 @@ if (active) {
   document.getElementById("teamTitle").value = "";
   document.getElementById("teamImage").value = "";
   }
-}
+
 checkSession();
 </script>
 </body>
