@@ -229,41 +229,38 @@ if (bannerLock && bannerNote) {
     box.textContent = "No analysis available yet.";
     return;
   }
+data.forEach(item => {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const title = document.createElement("h3");
+  title.textContent = item.title;
+
+  const content = document.createElement("p");
+  content.className = "muted";
 
   if (item.is_premium && !hasPremiumAccess) {
-  content.textContent = "🔒 Premium Content";
-} else {
-  content.textContent = item.analysis;
-}
-
-content.style.display = "none";
-title.style.cursor = "pointer";
-
-title.addEventListener("click", () => {
-  if (item.is_premium && !hasPremiumAccess) {
-    alert("यह Premium Analysis केवल Premium Members के लिए है।");
-    return;
+    content.textContent = "🔒 Premium Content";
+  } else {
+    content.textContent = item.analysis;
   }
 
-  content.style.display =
-    content.style.display === "none" ? "block" : "none";
-});
+  content.style.display = "none";
+  title.style.cursor = "pointer";
 
-card.append(title, content);
-box.appendChild(card);
-
-    const content = document.createElement("p");
-    content.className = "muted";
-
+  title.addEventListener("click", () => {
     if (item.is_premium && !hasPremiumAccess) {
-      content.textContent = "🔒 Premium Content";
-    } else {
-      content.textContent = item.analysis;
+      alert("यह Premium Analysis केवल Premium Members के लिए है");
+      return;
     }
 
-    card.append(title, content);
-    box.appendChild(card);
+    content.style.display =
+      content.style.display === "none" ? "block" : "none";
   });
+
+  card.append(title, content);
+  box.appendChild(card);
+});
 }
 async function signUpUser() {
   const email = document.getElementById("auth-email").value.trim();
