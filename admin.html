@@ -347,7 +347,62 @@ message("Analysis published!");
 document.getElementById("analysisTitle").value="";
 document.getElementById("analysisText").value="";
 }
+async function loadAnalysis() {
+  const box = document.getElementById("analysisList");
+  box.textContent = "Loading analysis...";
 
+  const { data, error } = await db
+    .from("premium_analysis")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  box.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    box.textContent = "No analysis found.";
+    return;
+  }
+
+  data.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("h3");
+    title.textContent = item.title;
+
+    const content = document.createElement("p");
+    content.textContent = item.analysis;
+
+    const del = document.createElement("button");
+    del.textContent = "DELETE";
+    del.className = "delete";
+
+    del.onclick = async () => {
+      if (!confirm("Delete this analysis?")) return;
+
+      const { error } = await db
+        .from("premium_analysis")
+        .delete()
+        .eq("id", item.id);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      alert("Analysis deleted!");
+      loadAnalysis();
+    };
+
+    card.append(title, content, del);
+    box.appendChild(card);
+  });
+}
 async function checkSession(){
 const {data}=await db.auth.getSession();
 const user=data.session?.user;
