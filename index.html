@@ -193,7 +193,7 @@ async function loadPremiumAnalysis() {
       .select("is_premium, premium_expiry")
       .eq("id", user.id)
       .maybeSingle();
-alert("Profile: " + !!profile + "\nPremium: " + profile?.is_premium + "\nExpiry: " + profile?.premium_expiry);
+
     hasPremiumAccess = !!(
       profile &&
       profile.is_premium === true &&
