@@ -36,6 +36,17 @@ small{color:#a9bad0}
 <h1>🏏 ADMIN DASHBOARD</h1>
 <p>Welcome to Cricket Analyst Pro</p>
 <button class="logout" onclick="logout()">LOGOUT</button>
+  <div class="card">
+  <h2>📸 Upload Team Image</h2>
+  <input type="text" id="teamTitle" placeholder="Team Title">
+  <input type="file" id="teamImage" accept="image/jpeg,image/png">
+  <select id="teamAccess">
+    <option value="premium">Premium Team</option>
+    <option value="free">Free Team</option>
+  </select>
+  <button onclick="uploadTeamImage()">UPLOAD TEAM</button>
+  <p id="uploadStatus"></p>
+  </div>
 <div class="card">
   <h2>👥 Manage Users</h2>
   <button onclick="loadUsers()">Refresh Users</button>
