@@ -360,6 +360,60 @@ async function updateNewPassword() {
 alert("Password successfully updated!");
 document.getElementById("password-reset-box").style.display = "none";
 }
+async function loadTeamImages() {
+  const gallery = document.getElementById("team-gallery");
+
+  gallery.innerHTML = "<p>Loading team images...</p>";
+
+  const { data, error } = await db
+    .from("team_images")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    gallery.innerHTML = "<p>Images load nahi hui: " + error.message + "</p>";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    gallery.innerHTML = "<p>Abhi koi team image available nahi hai.</p>";
+    return;
+  }
+
+  gallery.innerHTML = "";
+
+  for (const team of data) {
+    const { data: imageData, error: imageError } = await db.storage
+      .from("premium-teams")
+      .createSignedUrl(team.image_path, 3600);
+
+    if (imageError) continue;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("h3");
+    title.textContent = team.title;
+
+    const image = document.createElement("img");
+    image.src = imageData.signedUrl;
+    image.alt = team.title;
+    image.style.width = "100%";
+    image.style.borderRadius = "10px";
+
+    const label = document.createElement("p");
+    label.textContent = team.access === "premium"
+      ? "👑 PREMIUM TEAM"
+      : "🆓 FREE TEAM";
+
+    card.appendChild(title);
+    card.appendChild(label);
+    card.appendChild(image);
+    gallery.appendChild(card);
+  }
+}
+
+loadTeamImages();
 </script>
   
 </body>
