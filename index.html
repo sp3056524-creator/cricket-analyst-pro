@@ -364,7 +364,8 @@ async function loadTeamImages() {
   const gallery = document.getElementById("team-gallery");
   gallery.innerHTML = "<p>Loading team images...</p>";
 
-  const { data: { user } } = await db.auth.getUser();
+  const { data: { session } } = await db.auth.getSession();
+const user = session ? session.user : null;
 
   let hasPremium = false;
 
