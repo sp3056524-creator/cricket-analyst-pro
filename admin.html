@@ -634,7 +634,7 @@ async function loadTeamImages() {
 
     const { data: imageData, error: imageError } = await db.storage
       .from("premium-teams")
-      .createSignedUrl(team.image_path, 3600);
+      .createSignedUrl(team.image_path, 300);
 
     if (!imageError) {
       const img = document.createElement("img");
