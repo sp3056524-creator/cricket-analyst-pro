@@ -160,6 +160,7 @@ document.getElementById("login").classList.add("hidden");
 document.getElementById("dashboard").classList.remove("hidden");
 await loadMatches();
 await loadAnalysis();
+await loadTeamImages();
 }
 
 async function logout(){
@@ -597,7 +598,150 @@ async function uploadTeamImage() {
   document.getElementById("teamTitle").value = "";
   document.getElementById("teamImage").value = "";
   }
+async function loadTeamImages() {
+  const list = document.getElementById("teamImagesList");
+  if (!list) return;
 
+  list.textContent = "Loading images...";
+
+  const { data, error } = await db
+    .from("team_images")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    list.textContent = "Error: " + error.message;
+    return;
+  }
+
+  list.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    list.textContent = "No team images uploaded yet.";
+    return;
+  }
+
+  for (const team of data) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const title = document.createElement("input");
+    title.value = team.title;
+    title.placeholder = "Team Title";
+
+    const type = document.createElement("p");
+    type.textContent = team.access.toUpperCase() + " TEAM";
+
+    const { data: imageData, error: imageError } = await db.storage
+      .from("premium-teams")
+      .createSignedUrl(team.image_path, 3600);
+
+    if (!imageError) {
+      const img = document.createElement("img");
+      img.src = imageData.signedUrl;
+      img.style.width = "100%";
+      img.style.borderRadius = "10px";
+      card.appendChild(img);
+    } else {
+      const warning = document.createElement("p");
+      warning.textContent = "Image preview unavailable: " + imageError.message;
+      card.appendChild(warning);
+    }
+
+    const file = document.createElement("input");
+    file.type = "file";
+    file.accept = "image/jpeg,image/png";
+
+    const updateBtn = document.createElement("button");
+    updateBtn.textContent = "UPDATE IMAGE";
+    updateBtn.onclick = async () => {
+      const newFile = file.files[0];
+
+      if (!newFile) {
+        alert("Pehle new JPG/PNG select karo.");
+        return;
+      }
+
+      if (!newFile.type.startsWith("image/")) {
+        alert("Sirf image file select karo.");
+        return;
+      }
+
+      updateBtn.disabled = true;
+      updateBtn.textContent = "Updating...";
+
+      const newPath = team.access + "/" + Date.now() + "-" +
+        newFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+      const { error: uploadError } = await db.storage
+        .from("premium-teams")
+        .upload(newPath, newFile);
+
+      if (uploadError) {
+        alert("Upload error: " + uploadError.message);
+        updateBtn.disabled = false;
+        updateBtn.textContent = "UPDATE IMAGE";
+        return;
+      }
+
+      const { error: updateError } = await db
+        .from("team_images")
+        .update({
+          title: title.value.trim() || team.title,
+          image_path: newPath
+        })
+        .eq("id", team.id);
+
+      if (updateError) {
+        await db.storage.from("premium-teams").remove([newPath]);
+        alert("Update error: " + updateError.message);
+        updateBtn.disabled = false;
+        updateBtn.textContent = "UPDATE IMAGE";
+        return;
+      }
+
+      await db.storage.from("premium-teams").remove([team.image_path]);
+
+      alert("Team image updated successfully!");
+      loadTeamImages();
+    };
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "DELETE TEAM";
+    deleteBtn.style.background = "#e05252";
+
+    deleteBtn.onclick = async () => {
+      if (!confirm("Kya is team image ko permanently delete karna hai?")) {
+        return;
+      }
+
+      deleteBtn.disabled = true;
+
+      const { error: deleteError } = await db
+        .from("team_images")
+        .delete()
+        .eq("id", team.id);
+
+      if (deleteError) {
+        alert("Delete error: " + deleteError.message);
+        deleteBtn.disabled = false;
+        return;
+      }
+
+      await db.storage.from("premium-teams").remove([team.image_path]);
+
+      alert("Team deleted successfully!");
+      loadTeamImages();
+    };
+
+    card.appendChild(title);
+    card.appendChild(type);
+    card.appendChild(file);
+    card.appendChild(updateBtn);
+    card.appendChild(deleteBtn);
+    list.appendChild(card);
+  }
+}
 checkSession();
 </script>
 </body>
