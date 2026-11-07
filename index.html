@@ -393,7 +393,7 @@ let hasPremium = false;
     gallery.textContent = "Images load nahi hui: " + error.message;
     return;
   }
-
+alert("Teams: " + (data || []).length + " | Premium: " + hasPremium);
   const visibleTeams = (data || []).filter(team =>
     team.access === "free" ||
     (team.access === "premium" && hasPremium)
