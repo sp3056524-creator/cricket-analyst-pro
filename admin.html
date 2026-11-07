@@ -532,8 +532,35 @@ ban.onclick = async () => {
   alert("User permanently banned!");
   loadUsers();
 };
+
     
-    card.append(info, expiry, activate, deactivate, ban);
+const unban = document.createElement("button");
+unban.textContent = "UNBAN USER";
+unban.style.background = "#16a34a";
+unban.style.color = "white";
+
+unban.onclick = async () => {
+  if (!confirm("Kya is user ka BAN hatana hai?")) return;
+
+  const { data, error } = await db.functions.invoke(
+    "unban-user",
+    {
+      body: {
+        user_id: user.id
+      }
+    }
+  );
+
+  if (error || !data?.success) {
+    alert("Unban failed: " + (error?.message || data?.error));
+    return;
+  }
+
+  alert("User successfully unbanned!");
+  loadUsers();
+};
+    
+    card.append(info, expiry, activate, deactivate, ban, unban);
     box.appendChild(card);
   });
 }
