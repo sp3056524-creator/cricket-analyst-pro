@@ -467,8 +467,7 @@ async function loadUsers() {
 
   const { data, error } = await db
     .from("profiles")
-    .select("id, email, full_name, is_premium, premium_expiry, is_banned");
-    
+    .select("id, email, full_name, is_premium, premium_expiry, is_banned, ban_reason, banned_at");
   if (error) {
     box.textContent = error.message;
     return;
@@ -491,6 +490,17 @@ if (user.is_banned) {
   bannedLabel.style.fontWeight = "bold";
   bannedLabel.style.fontSize = "18px";
   card.appendChild(bannedLabel);
+
+const banReason = document.createElement("p");
+banReason.textContent = "Ban Reason: " + (user.ban_reason || "Not available");
+card.appendChild(banReason);
+
+const banDate = document.createElement("p");
+banDate.textContent = user.banned_at
+  ? "Banned On: " + new Date(user.banned_at).toLocaleString("en-IN")
+  : "Ban Date: Not available";
+card.appendChild(banDate);
+}
 }
     const info = document.createElement("p");
     info.textContent =
