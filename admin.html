@@ -503,7 +503,37 @@ async function loadUsers() {
     deactivate.textContent = "Remove Premium";
     deactivate.onclick = () => updateUserPremium(user.id, false);
 
-    card.append(info, expiry, activate, deactivate);
+const ban = document.createElement("button");
+ban.textContent = "PERMANENT BAN";
+ban.style.background = "#dc2626";
+ban.style.color = "white";
+
+ban.onclick = async () => {
+  const reason = prompt("Ban karne ka reason likho:");
+  if (reason === null) return;
+
+  if (!confirm("Kya is user ko permanently BAN karna hai?")) return;
+
+  const { data, error } = await db.functions.invoke(
+    "permanent-ban",
+    {
+      body: {
+        user_id: user.id,
+        reason: reason
+      }
+    }
+  );
+
+  if (error || !data?.success) {
+    alert("Ban failed: " + (error?.message || data?.error));
+    return;
+  }
+
+  alert("User permanently banned!");
+  loadUsers();
+};
+    
+    card.append(info, expiry, activate, deactivate, ban);
     box.appendChild(card);
   });
 }
