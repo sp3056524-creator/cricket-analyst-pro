@@ -443,23 +443,36 @@ if (team.access === "premium" && user) {
         ? parts[0].slice(0, 2) + "***@" + parts[1]
         : "Premium Member";
 
-    const watermark = document.createElement("div");
-    watermark.textContent = profileName + " • " + maskedEmail;
-    watermark.style.position = "absolute";
-    watermark.style.inset = "0";
-    watermark.style.display = "flex";
-    watermark.style.alignItems = "center";
-    watermark.style.justifyContent = "center";
-    watermark.style.textAlign = "center";
-    watermark.style.color = "white";
-    watermark.style.fontSize = "15px";
-    watermark.style.fontWeight = "bold";
-    watermark.style.opacity = "0.65";
-    watermark.style.textShadow = "1px 1px 4px black";
-    watermark.style.transform = "rotate(-25deg)";
-    watermark.style.pointerEvents = "none";
+    const parts = (user.email || "").split("@");
+const maskedEmail = parts.length === 2
+  ? parts[0].slice(0, 2) + "****@" + parts[1]
+  : "Premium Member";
 
-    imageWrap.appendChild(watermark);
+const watermark = document.createElement("div");
+watermark.style.position = "absolute";
+watermark.style.inset = "0";
+watermark.style.pointerEvents = "none";
+watermark.style.overflow = "hidden";
+watermark.style.display = "grid";
+watermark.style.gridTemplateColumns = "repeat(3, 1fr)";
+watermark.style.gridTemplateRows = "repeat(5, 1fr)";
+watermark.style.alignItems = "center";
+watermark.style.justifyItems = "center";
+
+for (let i = 0; i < 15; i++) {
+  const stamp = document.createElement("div");
+  stamp.textContent = profileName + " • " + maskedEmail;
+  stamp.style.color = "white";
+  stamp.style.fontSize = "12px";
+  stamp.style.fontWeight = "bold";
+  stamp.style.opacity = "0.38";
+  stamp.style.whiteSpace = "nowrap";
+  stamp.style.textShadow = "1px 1px 3px black";
+  stamp.style.transform = "rotate(-30deg)";
+  watermark.appendChild(stamp);
+}
+
+imageWrap.appendChild(watermark);
 }
 
 card.appendChild(title);
