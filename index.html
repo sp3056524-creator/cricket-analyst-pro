@@ -367,12 +367,12 @@ async function loadTeamImages() {
   const { data: { session } } = await db.auth.getSession();
 const user = session ? session.user : null;
 
-  let hasPremium = false;
+  let profileName = "Premium Member";
 
   if (user) {
     const { data: profile } = await db
       .from("profiles")
-      .select("is_premium, premium_expiry")
+      .select("full_name, is_premium, premium_expiry")
       .eq("id", user.id)
       .maybeSingle();
 
