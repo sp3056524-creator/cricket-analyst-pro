@@ -443,10 +443,13 @@ if (team.access === "premium" && user) {
         ? parts[0].slice(0, 2) + "***@" + parts[1]
         : "Premium Member";
 
+  if (team.access === "premium" && user) {
   const parts = (user.email || "").split("@");
-const maskedEmail = parts.length === 2
-  ? parts[0].slice(0, 2) + "****@" + parts[1]
-  : "Premium Member";
+  const maskedEmail = parts.length === 2
+    ? parts[0].slice(0, 2) + "****@" + parts[1]
+    : "Premium Member";
+
+  const watermark = document.createElement("div");
 const watermark = document.createElement("div");
 watermark.style.position = "absolute";
 watermark.style.inset = "0";
