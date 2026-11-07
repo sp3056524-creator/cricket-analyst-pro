@@ -366,7 +366,7 @@ async function loadTeamImages() {
 
   const { data: { session } } = await db.auth.getSession();
 const user = session ? session.user : null;
-
+let hasPremium = false;
   let profileName = "Premium Member";
 
   if (user) {
