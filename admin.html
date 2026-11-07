@@ -516,17 +516,24 @@ ban.style.background = "#dc2626";
 ban.style.color = "white";
 
 ban.onclick = async () => {
-  const reason = prompt("Ban karne ka reason likho:");
-  if (reason === null) return;
+const reason = prompt("Ban karne ka valid reason likho (minimum 5 characters):");
 
-  if (!confirm("Kya is user ko permanently BAN karna hai?")) return;
+if (reason === null) return;
 
+const cleanReason = reason.trim();
+
+if (cleanReason.length < 5 || cleanReason.length > 200) {
+  alert("Reason 5 se 200 characters ke beech hona chahiye.");
+  return;
+}
+
+if (!confirm("Kya is user ko permanently BAN karna hai?")) return;
   const { data, error } = await db.functions.invoke(
     "permanent-ban",
     {
       body: {
         user_id: user.id,
-        reason: reason
+        reason: cleanReason
       }
     }
   );
