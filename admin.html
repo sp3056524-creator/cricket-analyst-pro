@@ -467,7 +467,7 @@ async function loadUsers() {
 
   const { data, error } = await db
     .from("profiles")
-    .select("id, email, full_name, is_premium, premium_expiry");
+    .select("id, email, full_name, is_premium, premium_expiry, is_banned");
     
   if (error) {
     box.textContent = error.message;
@@ -484,7 +484,14 @@ async function loadUsers() {
   data.forEach(user => {
     const card = document.createElement("div");
     card.className = "card";
-
+if (user.is_banned) {
+  const bannedLabel = document.createElement("p");
+  bannedLabel.textContent = "🚫 BANNED USER";
+  bannedLabel.style.color = "#ff4444";
+  bannedLabel.style.fontWeight = "bold";
+  bannedLabel.style.fontSize = "18px";
+  card.appendChild(bannedLabel);
+}
     const info = document.createElement("p");
     info.textContent =
       (user.full_name || "User") + " | " + user.email +
