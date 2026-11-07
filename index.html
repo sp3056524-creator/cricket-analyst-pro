@@ -489,7 +489,7 @@ gallery.appendChild(card);
     gallery.appendChild(card);
   }
 }
-loadTeamImages();
+db.auth.getSession().then(({ data: { session } }) => loadTeamImages(session));
 </script>
   
 </body>
