@@ -339,7 +339,7 @@ loadPremiumAnalysis();
     event === "SIGNED_IN" ||
     event === "TOKEN_REFRESHED"
   ) {
-    setTimeout(() => loadTeamImages(), 0);
+    setTimeout(() => loadTeamImages(session), 0);
   }
 });
 
@@ -369,12 +369,11 @@ async function updateNewPassword() {
 alert("Password successfully updated!");
 document.getElementById("password-reset-box").style.display = "none";
 }
-async function loadTeamImages() {
+async function loadTeamImages(authSession = null) {
   const gallery = document.getElementById("team-gallery");
   gallery.innerHTML = "<p>Loading team images...</p>";
 
-  const { data: { session } } = await db.auth.getSession();
-const user = session ? session.user : null;
+const user = authSession ? authSession.user : null;
 let hasPremium = false;
   let profileName = "Premium Member";
 
