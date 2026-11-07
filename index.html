@@ -375,6 +375,7 @@ const user = session ? session.user : null;
       .select("full_name, is_premium, premium_expiry")
       .eq("id", user.id)
       .maybeSingle();
+    profileName = profile?.full_name || "Premium Member";
 
     if (profile && profile.is_premium === true) {
       hasPremium =
@@ -423,15 +424,48 @@ const user = session ? session.user : null;
       ? "👑 PREMIUM TEAM"
       : "🆓 FREE TEAM";
 
-    const image = document.createElement("img");
-    image.src = imageData.signedUrl;
-    image.alt = team.title;
-    image.style.width = "100%";
-    image.style.borderRadius = "10px";
+    const imageWrap = document.createElement("div");
+imageWrap.style.position = "relative";
+imageWrap.style.overflow = "hidden";
+imageWrap.style.borderRadius = "10px";
 
-    card.appendChild(title);
-    card.appendChild(label);
-    card.appendChild(image);
+const image = document.createElement("img");
+image.src = imageData.signedUrl;
+image.alt = team.title;
+image.style.width = "100%";
+image.style.display = "block";
+
+imageWrap.appendChild(image);
+
+if (team.access === "premium" && user) {
+    const parts = (user.email || "").split("@");
+    const maskedEmail = parts.length === 2
+        ? parts[0].slice(0, 2) + "***@" + parts[1]
+        : "Premium Member";
+
+    const watermark = document.createElement("div");
+    watermark.textContent = profileName + " • " + maskedEmail;
+    watermark.style.position = "absolute";
+    watermark.style.inset = "0";
+    watermark.style.display = "flex";
+    watermark.style.alignItems = "center";
+    watermark.style.justifyContent = "center";
+    watermark.style.textAlign = "center";
+    watermark.style.color = "white";
+    watermark.style.fontSize = "15px";
+    watermark.style.fontWeight = "bold";
+    watermark.style.opacity = "0.65";
+    watermark.style.textShadow = "1px 1px 4px black";
+    watermark.style.transform = "rotate(-25deg)";
+    watermark.style.pointerEvents = "none";
+
+    imageWrap.appendChild(watermark);
+}
+
+card.appendChild(title);
+card.appendChild(label);
+card.appendChild(imageWrap);
+gallery.appendChild(card);
     gallery.appendChild(card);
   }
 }
