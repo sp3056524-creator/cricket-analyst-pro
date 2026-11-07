@@ -434,7 +434,7 @@ image.src = imageData.signedUrl;
 image.alt = team.title;
 image.style.width = "100%";
 image.style.display = "block";
-
+imageWrap.style.aspectRatio = "auto";
 imageWrap.appendChild(image);
 
 if (team.access === "premium" && user) {
