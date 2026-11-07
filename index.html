@@ -330,21 +330,20 @@ loadPremiumAnalysis();
   }
   }
   db.auth.onAuthStateChange((event, session) => {
-    if (event === "PASSWORD_RECOVERY") {
-        document.getElementById("password-reset-box").style.display = "block";
-    }
+  if (event === "PASSWORD_RECOVERY") {
+    document.getElementById("password-reset-box").style.display = "block";
+  }
 
-    if (
-        event === "INITIAL_SESSION" ||
-        event === "SIGNED_IN" ||
-        event === "TOKEN_REFRESHED"
-    ) {
-        setTimeout(() => {
-            loadTeamImages();
-            loadPremiumAnalysis();
-        }, 0);
-    }
+  if (
+    event === "INITIAL_SESSION" ||
+    event === "SIGNED_IN" ||
+    event === "TOKEN_REFRESHED"
+  ) {
+    setTimeout(() => loadTeamImages(), 0);
+  }
 });
+
+
 async function updateNewPassword() {
   const password = document.getElementById("new-password").value;
   const confirm = document.getElementById("confirm-password").value;
