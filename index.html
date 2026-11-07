@@ -445,7 +445,11 @@ if (team.access === "premium" && user) {
 
   const watermark = document.createElement("div");
 watermark.style.position = "absolute";
-watermark.style.inset = "0";
+watermark.style.inset = "0"; 
+watermark.style.width = "100%";
+watermark.style.height = "100%";
+watermark.style.boxSizing = "border-box";
+watermark.style.gridTemplateColumns = "repeat(3, 1fr)";
 watermark.style.pointerEvents = "none";
 watermark.style.overflow = "hidden";
 watermark.style.display = "grid";
