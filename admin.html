@@ -342,9 +342,14 @@ const box=document.getElementById("players");
 box.innerHTML="";
 if(!id)return;
 
-const {data,error}=await db.from("playing_xi")
-.select("*").eq("match_id",Number(id));
+const team = document.getElementById("xiTeam").value;
 
+if (!team) return;
+
+const {data,error}=await db.from("playing_xi")
+.select("*")
+.eq("match_id", Number(id))
+.eq("team_name", team);
 if(error){message(error.message);return;}
 
 (data||[]).forEach(p=>{
@@ -407,7 +412,7 @@ box.appendChild(div);
 }
 
 document.getElementById("matchSelect").addEventListener("change",loadPlayers);
-
+document.getElementById("xiTeam").addEventListener("change",loadPlayers);
 async function addAnalysis(){
 const match_id=document.getElementById("premiumMatch").value;
 const title=document.getElementById("analysisTitle").value.trim();
