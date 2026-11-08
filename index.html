@@ -329,17 +329,38 @@ loadPremiumAnalysis();
     alert("Password reset link email par bhej diya gaya hai.");
   }
   }
-  db.auth.onAuthStateChange((event, session) => {
+  function updateAuthUI(session) {
+  const loggedIn = !!session?.user;
+
+  const accountButtons = document.querySelectorAll("#account button");
+
+  document.getElementById("auth-status").textContent =
+    loggedIn ? "Logged in: " + session.user.email : "Login or create your account";
+
+  document.getElementById("auth-email").style.display =
+    loggedIn ? "none" : "block";
+
+  document.getElementById("auth-password").style.display =
+    loggedIn ? "none" : "block";
+
+  accountButtons[0].style.display = loggedIn ? "none" : "inline-block";
+  accountButtons[1].style.display = loggedIn ? "none" : "inline-block";
+  accountButtons[2].style.display = loggedIn ? "inline-block" : "none";
+  accountButtons[3].style.display = loggedIn ? "none" : "inline-block";
+}
+
+db.auth.onAuthStateChange((event, session) => {
+  updateAuthUI(session);
+
   if (event === "PASSWORD_RECOVERY") {
     document.getElementById("password-reset-box").style.display = "block";
   }
 
-  if (
-    event === "INITIAL_SESSION" ||
-    event === "SIGNED_IN" ||
-    event === "TOKEN_REFRESHED"
-  ) {
-    setTimeout(() => loadTeamImages(session), 0);
+  if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+    setTimeout(() => {
+      loadTeamImages(session);
+      loadPremiumAnalysis();
+    }, 0);
   }
 });
 
