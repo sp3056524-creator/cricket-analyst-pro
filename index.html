@@ -101,6 +101,10 @@ Forgot Password?
 <h3 id="lineup">Official Playing XI</h3>
 <p class="muted">Verified team lineups and toss information.</p>
 </div>
+  <div class="card" id="playing-xi-section">
+  <h3>🏏 Official Playing XI – India vs New Zealand</h3>
+  <div id="user-playing-xi">Loading Playing XI...</div>
+  </div>
 <h2 class="heading">📸 Team Screenshot Gallery</h2>
 <div id="team-gallery">
   <p class="muted">Loading team images...</p>
@@ -264,6 +268,64 @@ data.forEach(item => {
   card.append(title, content);
   box.appendChild(card);
 });
+}
+async function loadUserPlayingXI() {
+  const box = document.getElementById("user-playing-xi");
+  box.textContent = "Loading Playing XI...";
+
+  const { data: matches, error: matchError } = await db
+    .from("matches")
+    .select("id, team_a, team_b, match_date")
+    .order("match_date", { ascending: false })
+    .limit(1);
+
+  if (matchError) {
+    box.textContent = "Match loading error: " + matchError.message;
+    return;
+  }
+
+  if (!matches || matches.length === 0) {
+    box.textContent = "No match available.";
+    return;
+  }
+
+  const match = matches[0];
+
+  const { data, error } = await db
+    .from("playing_xi")
+    .select("team_name, player_name, is_captain, is_wicketkeeper")
+    .eq("match_id", match.id);
+
+  if (error) {
+    box.textContent = "Playing XI error: " + error.message;
+    return;
+  }
+
+  box.innerHTML = "";
+
+  [match.team_a, match.team_b].forEach(team => {
+    const heading = document.createElement("h3");
+    heading.textContent = team + " Playing XI";
+    box.appendChild(heading);
+
+    const players = (data || []).filter(p => p.team_name === team);
+
+    if (players.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "Playing XI not added yet.";
+      box.appendChild(empty);
+      return;
+    }
+
+    players.forEach((p, index) => {
+      const item = document.createElement("p");
+      item.textContent =
+        (index + 1) + ". " + p.player_name +
+        (p.is_captain ? " (C)" : "") +
+        (p.is_wicketkeeper ? " (WK)" : "");
+      box.appendChild(item);
+    });
+  });
 }
 async function signUpUser() {
   const email = document.getElementById("auth-email").value.trim();
@@ -507,10 +569,10 @@ card.appendChild(title);
 card.appendChild(label);
 card.appendChild(imageWrap);
 gallery.appendChild(card);
-    gallery.appendChild(card);
+  
   }
 }
-
+loadUserPlayingXI();
 </script>
   
 </body>
