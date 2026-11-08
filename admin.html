@@ -95,7 +95,25 @@ small{color:#a9bad0}
 <button onclick="addPlayer()">ADD PLAYER</button>
 <div id="players"></div>
 </div>
+<div class="card">
+  <h2>📋 Bulk Add Playing XI</h2>
+  <select id="bulkMatch">
+  <option value="">Select Match</option>
+  </select>
 
+  <p>India - 11 Players (हर नाम नई लाइन में)</p>
+  <textarea id="indiaPlayers" rows="8" placeholder="Rohit Sharma
+Virat Kohli
+Shubman Gill"></textarea>
+
+  <p>New Zealand - 11 Players (हर नाम नई लाइन में)</p>
+  <textarea id="nzPlayers" rows="8" placeholder="Tim Seifert
+Devon Conway
+Kane Williamson"></textarea>
+
+  <button onclick="bulkAddPlayers()">SAVE PLAYING XI</button>
+  <p id="bulkStatus"></p>
+</div>
 <div class="card">
 <h2>👑 Premium Analysis</h2>
 <select id="premiumMatch">
@@ -213,7 +231,7 @@ const {data,error}=await db.from("matches")
 if(error){message(error.message);return;}
 
 const list=document.getElementById("matches");
-const selects=["matchSelect","premiumMatch"];
+const selects=["matchSelect","premiumMatch","bulkMatch"];
 
 selects.forEach(id=>{
 const s=document.getElementById(id);
@@ -499,6 +517,55 @@ del.onclick = async () => {
 card.append(title, content, edit, del);
 box.appendChild(card);
   });
+}
+async function bulkAddPlayers() {
+  const matchId = document.getElementById("bulkMatch").value;
+  const status = document.getElementById("bulkStatus");
+
+  const india = document.getElementById("indiaPlayers").value
+    .split("\n").map(p => p.trim()).filter(Boolean);
+
+  const nz = document.getElementById("nzPlayers").value
+    .split("\n").map(p => p.trim()).filter(Boolean);
+
+  if (!matchId) {
+    status.textContent = "Please select a match.";
+    return;
+  }
+
+  if (india.length !== 11 || nz.length !== 11) {
+    status.textContent = "Dono teams mein exactly 11 players hone chahiye.";
+    return;
+  }
+
+  const players = [
+    ...india.map(player => ({
+      match_id: Number(matchId),
+      team_name: "India",
+      player_name: player,
+      is_captain: false,
+      is_wicketkeeper: false
+    })),
+    ...nz.map(player => ({
+      match_id: Number(matchId),
+      team_name: "New Zealand",
+      player_name: player,
+      is_captain: false,
+      is_wicketkeeper: false
+    }))
+  ];
+
+  const { error } = await db.from("playing_xi").insert(players);
+
+  if (error) {
+    status.textContent = "Error: " + error.message;
+    return;
+  }
+
+  status.textContent = "Successfully added all 22 players!";
+  document.getElementById("indiaPlayers").value = "";
+  document.getElementById("nzPlayers").value = "";
+  loadPlayers();
 }
 async function checkSession(){
 const {data}=await db.auth.getSession();
