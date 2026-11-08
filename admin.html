@@ -118,7 +118,13 @@ const SUPABASE_URL = "https://knjjglmoborkqmagjzpe.supabase.co";
 const SUPABASE_KEY = "sb_publishable_b_L9qWRfBew0ux7CjkDVlg_JomkHCvK";
 
 const db = window.supabase.createClient(
-SUPABASE_URL, SUPABASE_KEY
+  SUPABASE_URL,
+  SUPABASE_KEY,
+  {
+    auth: {
+      storageKey: "cricket-analyst-admin-auth"
+    }
+  }
 );
 
 const ADMIN = "cricdjpro@gmail.com";
