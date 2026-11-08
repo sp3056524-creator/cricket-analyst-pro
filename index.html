@@ -308,7 +308,10 @@ async function loadUserPlayingXI() {
     heading.textContent = team + " Playing XI";
     box.appendChild(heading);
 
-    const players = (data || []).filter(p => p.team_name === team);
+    const players = (data || []).filter(p =>
+  String(p.team_name).trim().toLowerCase().replace(/\s+/g, "") ===
+  String(team).trim().toLowerCase().replace(/\s+/g, "")
+);
 
     if (players.length === 0) {
       const empty = document.createElement("p");
