@@ -331,7 +331,45 @@ div.className="item";
 div.textContent=p.team_name+" - "+p.player_name+
 (p.is_captain?" (C)":"")+
 (p.is_wicketkeeper?" (WK)":"");
+const edit = document.createElement("button");
+edit.textContent = "EDIT PLAYER";
+edit.style.background = "#2563eb";
+edit.style.color = "white";
 
+edit.onclick = async () => {
+  const newTeam = prompt("Team Name:", p.team_name);
+  if (newTeam === null) return;
+
+  const newPlayer = prompt("Player Name:", p.player_name);
+  if (newPlayer === null) return;
+
+  if (!newTeam.trim() || !newPlayer.trim()) {
+    alert("Team aur Player name khali nahi ho sakte.");
+    return;
+  }
+
+  const isCaptain = confirm("Kya yeh Captain hai? OK = Yes, Cancel = No");
+  const isKeeper = confirm("Kya yeh Wicketkeeper hai? OK = Yes, Cancel = No");
+
+  const { error } = await db.from("playing_xi")
+    .update({
+      team_name: newTeam.trim(),
+      player_name: newPlayer.trim(),
+      is_captain: isCaptain,
+      is_wicketkeeper: isKeeper
+    })
+    .eq("id", p.id);
+
+  if (error) {
+    alert("Update error: " + error.message);
+    return;
+  }
+
+  alert("Player updated successfully!");
+  await loadPlayers();
+};
+
+div.appendChild(edit);
 const del=document.createElement("button");
 del.className="delete";
 del.textContent="Remove";
