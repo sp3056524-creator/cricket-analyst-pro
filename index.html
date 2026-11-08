@@ -303,32 +303,52 @@ async function loadUserPlayingXI() {
 
   box.innerHTML = "";
 
-  [match.team_a, match.team_b].forEach(team => {
-    const heading = document.createElement("h3");
-    heading.textContent = team + " Playing XI";
-    box.appendChild(heading);
 
-    const players = (data || []).filter(p =>
-  String(p.team_name).trim().toLowerCase().replace(/\s+/g, "") ===
-  String(team).trim().toLowerCase().replace(/\s+/g, "")
-);
+const teamsGrid = document.createElement("div");
+teamsGrid.style.display = "grid";
+teamsGrid.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+teamsGrid.style.gap = "10px";
+teamsGrid.style.alignItems = "start";
 
-    if (players.length === 0) {
-      const empty = document.createElement("p");
-      empty.textContent = "Playing XI not added yet.";
-      box.appendChild(empty);
-      return;
-    }
+[match.team_a, match.team_b].forEach(team => {
+  const teamCard = document.createElement("div");
+  teamCard.style.background = "#14243a";
+  teamCard.style.padding = "10px";
+  teamCard.style.borderRadius = "10px";
+  teamCard.style.minWidth = "0";
 
+  const heading = document.createElement("h3");
+  heading.textContent = team + " Playing XI";
+  heading.style.fontSize = "16px";
+  teamCard.appendChild(heading);
+
+  const players = (data || []).filter(p =>
+    String(p.team_name).trim().toLowerCase().replace(/\s+/g, "") ===
+    String(team).trim().toLowerCase().replace(/\s+/g, "")
+  );
+
+  if (players.length === 0) {
+    const empty = document.createElement("p");
+    empty.textContent = "Playing XI not added yet.";
+    teamCard.appendChild(empty);
+  } else {
     players.forEach((p, index) => {
       const item = document.createElement("p");
+      item.style.fontSize = "14px";
+      item.style.margin = "7px 0";
+      item.style.overflowWrap = "anywhere";
       item.textContent =
         (index + 1) + ". " + p.player_name +
         (p.is_captain ? " (C)" : "") +
         (p.is_wicketkeeper ? " (WK)" : "");
-      box.appendChild(item);
+      teamCard.appendChild(item);
     });
-  });
+  }
+
+  teamsGrid.appendChild(teamCard);
+});
+
+box.appendChild(teamsGrid);
 }
 async function signUpUser() {
   const email = document.getElementById("auth-email").value.trim();
