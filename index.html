@@ -475,7 +475,9 @@ async function updateNewPassword() {
 alert("Password successfully updated!");
 document.getElementById("password-reset-box").style.display = "none";
 }
+let teamImagesLoadVersion = 0;
 async function loadTeamImages(authSession = null) {
+  const currentLoadVersion = ++teamImagesLoadVersion;
   const gallery = document.getElementById("team-gallery");
   gallery.innerHTML = "<p>Loading team images...</p>";
 
@@ -502,7 +504,7 @@ let hasPremium = false;
     .from("team_images")
     .select("*")
     .order("created_at", { ascending: false });
-
+if (currentLoadVersion !== teamImagesLoadVersion) return;
   if (error) {
     gallery.textContent = "Images load nahi hui: " + error.message;
     return;
@@ -524,7 +526,7 @@ let hasPremium = false;
     const { data: imageData, error: imageError } = await db.storage
       .from("premium-teams")
       .createSignedUrl(team.image_path, 300);
-
+if (currentLoadVersion !== teamImagesLoadVersion) return;
     if (imageError) continue;
 
     const card = document.createElement("div");
