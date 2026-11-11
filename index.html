@@ -125,6 +125,12 @@ Forgot Password?
 <p class="muted" id="premium-banner-note" style="margin-top:12px">Premium access coming soon.</p>
 </div>
 <div id="premium-list"></div>
+<section class="container" id="free-analysis">
+  <h2 class="heading">🆓 Free Match Analysis</h2>
+  <div id="free-analysis-list">
+    <p class="muted">Loading Free Match Analysis...</p>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -598,6 +604,75 @@ gallery.appendChild(card);
   }
 }
 loadUserPlayingXI();
+async function loadFreeAnalysis() {
+  const list = document.getElementById("free-analysis-list");
+  if (!list) return;
+
+  list.textContent = "Loading Free Match Analysis...";
+
+  try {
+    const { data, error } = await db
+      .from("free_match_analysis")
+      .select("*")
+      .eq("is_published", true)
+      .order("match_date", { ascending: true });
+
+    if (error) throw error;
+
+    list.replaceChildren();
+
+    if (!data || data.length === 0) {
+      list.textContent = "No Free Match Analysis available yet.";
+      return;
+    }
+
+    const fields = [
+      ["pitch_report", "Pitch Report"],
+      ["head_to_head", "Head to Head"],
+      ["probable_xi", "Probable Playing XI"],
+      ["player_analysis", "Player Analysis"],
+      ["team_analysis", "Team Strength & Weakness"],
+      ["match_prediction", "Match Prediction"],
+      ["toss_update", "Toss Update"]
+    ];
+
+    data.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const title = document.createElement("h3");
+      title.textContent = item.match_title;
+      card.appendChild(title);
+
+      if (item.match_date) {
+        const date = document.createElement("p");
+        date.className = "muted";
+        date.textContent = new Date(item.match_date).toLocaleString();
+        card.appendChild(date);
+      }
+
+      fields.forEach(([key, label]) => {
+        if (!item[key]) return;
+
+        const heading = document.createElement("h3");
+        heading.textContent = label;
+
+        const content = document.createElement("p");
+        content.textContent = item[key];
+        content.style.whiteSpace = "pre-wrap";
+
+        card.append(heading, content);
+      });
+
+      list.appendChild(card);
+    });
+
+  } catch (error) {
+    list.textContent = "Error loading analysis: " + error.message;
+  }
+}
+
+loadFreeAnalysis();
 </script>
   
 </body>
