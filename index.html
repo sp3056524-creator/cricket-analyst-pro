@@ -673,6 +673,20 @@ async function loadFreeAnalysis() {
         card.append(heading, content);
       });
 
+const readLink = document.createElement("a");
+readLink.href = "./match.html?id=" + encodeURIComponent(item.id);
+readLink.textContent = "Read Full Analysis →";
+readLink.style.display = "inline-block";
+readLink.style.marginTop = "15px";
+readLink.style.padding = "12px 20px";
+readLink.style.background = "#f5b942";
+readLink.style.color = "#07111f";
+readLink.style.borderRadius = "8px";
+readLink.style.fontWeight = "bold";
+readLink.style.textDecoration = "none";
+
+card.appendChild(readLink);
+      
       list.appendChild(card);
     });
 
