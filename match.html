@@ -82,13 +82,7 @@ return;
 
 const title=data.match_title || "Cricket Match Analysis";
 const date = data.match_date
-  ? new Date(data.match_date).toLocaleString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    })
+  ? new Date(data.match_date).toLocaleString("en-IN")
   : "";
 
 const description=("Free analysis for "+title+": pitch report, head-to-head, probable playing XI and player insights.").slice(0,155);
