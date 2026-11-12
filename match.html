@@ -1,1 +1,121 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07111f">
+<title>Cricket Match Analysis | Cricket Analyst Pro</title>
+<meta name="description" content="Free cricket match analysis, pitch report, head-to-head, probable playing XI and player analysis.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Cricket Analyst Pro">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#07111f;color:#eaf1fb;font-family:Arial,sans-serif;line-height:1.65}
+.wrap{max-width:900px;margin:auto;padding:22px 16px 50px}
+.top{display:flex;justify-content:space-between;margin-bottom:22px}
+a{color:#9cc8ff;text-decoration:none}
+.brand{font-weight:800;color:white;font-size:18px}
+.hero{background:linear-gradient(135deg,#102c49,#123d50,#174a43);border:1px solid #28516b;border-radius:18px;padding:26px;margin-bottom:18px}
+.tag{color:#8ee6c1;background:#103a37;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold}
+h1{font-size:clamp(26px,5vw,38px);line-height:1.2;color:white}
+.date{color:#bfd0e2;font-size:14px}
+.section,.message{background:#101d2e;border:1px solid #20344c;border-radius:14px;padding:20px;margin:14px 0}
+h2{font-size:19px;color:#8ee6c1;margin:0 0 10px}
+.body{white-space:pre-wrap;overflow-wrap:anywhere;color:#dce7f5}
+footer{text-align:center;color:#8294aa;font-size:12px;margin-top:30px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<nav class="top">
+<a class="brand" href="./index.html">🏏 Cricket Analyst Pro</a>
+<a href="./index.html">← Home</a>
+</nav>
+<div id="content" class="message">Loading match analysis...</div>
+<footer>Cricket Analyst Pro · Free Cricket Analysis</footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://knjjglmoborkqmagjzpe.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b_L9qWRfBew0ux7CjkDVlg_JomkHCvK";
+
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const fields = [
+["pitch_report","Pitch Report"],
+["head_to_head","Head-to-Head"],
+["probable_xi","Probable Playing XI"],
+["player_analysis","Player Analysis"],
+["team_analysis","Team Analysis"],
+["match_prediction","Match Analysis & Prediction"],
+["toss_update","Toss Update"]
+];
+
+function escapeHTML(value){
+return String(value ?? "").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+}
+
+async function loadMatch(){
+const id=new URLSearchParams(location.search).get("id");
+const root=document.getElementById("content");
+
+if(!id){
+root.textContent="Match ID missing. Please open a valid match link.";
+return;
+}
+
+const {data,error}=await db
+.from("free_match_analysis")
+.select("*")
+.eq("id",id)
+.eq("is_published",true)
+.single();
+
+if(error || !data){
+root.textContent="Match analysis unavailable or not published.";
+return;
+}
+
+const title=data.match_title || "Cricket Match Analysis";
+const date=data.match_date
+? new Date(data.match_date+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"})
+: "";
+
+const description=("Free analysis for "+title+": pitch report, head-to-head, probable playing XI and player insights.").slice(0,155);
+
+document.title=title+" | Cricket Analyst Pro";
+document.querySelector('meta[name="description"]').content=description;
+document.querySelector('meta[property="og:title"]')?.setAttribute("content",document.title);
+document.querySelector('meta[property="og:description"]')?.setAttribute("content",description);
+
+const sections=fields.map(([key,label])=>{
+const value=data[key];
+if(value===null || value===undefined || String(value).trim()==="") return "";
+return `<section class="section">
+<h2>${escapeHTML(label)}</h2>
+<div class="body">${escapeHTML(value)}</div>
+</section>`;
+}).join("");
+
+root.className="";
+root.innerHTML=`
+<header class="hero">
+<span class="tag">FREE MATCH ANALYSIS</span>
+<h1>${escapeHTML(title)}</h1>
+<div class="date">${escapeHTML(date)}</div>
+</header>
+${sections}
+`;
+}
+
+loadMatch().catch(()=>{
+document.getElementById("content").textContent="Unable to load match analysis. Please try again.";
+});
+</script>
+</body>
+</html>
+
