@@ -90,6 +90,42 @@ const description=("Free analysis for "+title+": pitch report, head-to-head, pro
 
 document.title=title+" | Cricket Analyst Pro";
 document.querySelector('meta[name="description"]').content=description;
+  let canonical = document.querySelector('link[rel="canonical"]');
+
+if (!canonical) {
+  canonical = document.createElement("link");
+  canonical.rel = "canonical";
+  document.head.appendChild(canonical);
+}
+
+canonical.href = location.origin + location.pathname + "?id=" + encodeURIComponent(id);
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": title,
+  "description": description,
+  "author": {
+    "@type": "Organization",
+    "name": "Cricket Analyst Pro"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Cricket Analyst Pro"
+  },
+  "mainEntityOfPage": canonical.href
+};
+
+let schemaTag = document.getElementById("match-schema");
+
+if (!schemaTag) {
+  schemaTag = document.createElement("script");
+  schemaTag.id = "match-schema";
+  schemaTag.type = "application/ld+json";
+  document.head.appendChild(schemaTag);
+}
+
+schemaTag.textContent = JSON.stringify(schema);
 document.querySelector('meta[property="og:title"]')?.setAttribute("content",document.title);
 document.querySelector('meta[property="og:description"]')?.setAttribute("content",description);
 
